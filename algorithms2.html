@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Loading</title>
+  <script src="https://cdn.jsdelivr.net/npm/core-js-bundle@3.30.0/minified.js"></script>
+    <script async
+     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtfLw5C_JW8OmcZgDaw_iTJGAnxB3h4Bg&loading=async&libraries=visualization&callback=initMap">
+    </script>
+    <script>
+        function theothers(elementno,entirelist){
+            otherlist =[]
+            for(let i =0; i<entirelist.length; i++){
+                if (i!=elementno){
+                    otherlist.push(entirelist[i])
+                }
+                else {
+                    //pass
+                }
+            }    
+            return otherlist      
+        }
+
+    </script>
+  <script>
+    var permutation = [];
+    var adjdurs = [];
+    async function initMap() {
+        const service = new google.maps.DistanceMatrixService();
+        latlnglist = []
+        distancearr = []
+        timearr = []
+        temparr=[]
+        distdur=[]
+        dists = []
+        distsf =[]
+        durs =[]
+        dursf=[]
+        let params = new URLSearchParams(location.search);
+        cordlistunordered = (params.get('cord')).split("_")
+        for (let i = 0; i < cordlistunordered.length; i++) {
+            let cord = (cordlistunordered[i]).split(',')
+            latlnglist.push(new google.maps.LatLng(Number(cord[0]), Number(cord[1])))
+        }
+        console.log(latlnglist)
+
+        
+        if (latlnglist.length === 2) {
+        const request = {
+          origins: [latlnglist[0]],
+          destinations: [latlnglist[1]],
+          travelMode: google.maps.TravelMode.DRIVING,
+          unitSystem: google.maps.UnitSystem.METRIC,
+          avoidHighways: false,
+          avoidTolls: false,
+        };
+
+        await service.getDistanceMatrix(request).then((response) => {
+          temparr.push(response.rows);
+          // Directly calculate distance and duration between two points
+          let distance = response.rows[0].elements[0].distance.text;
+          let duration = response.rows[0].elements[0].duration.text;
+
+          console.log(`Distance: ${distance}, Duration: ${duration}`);
+          
+          // Redirect with the original coordinates since no permutation is needed
+          let opstr = cordlistunordered.join("_");
+          window.location.href = "map.html?cord=" + opstr;
+        });
+        return;
+      }
+
+//
+        for (let i = 0; i < cordlistunordered.length; i++){
+        const request = {
+            origins: [latlnglist[i]],
+            destinations: theothers(i,latlnglist),
+            travelMode: google.maps.TravelMode.DRIVING,
+            unitSystem: google.maps.UnitSystem.METRIC,
+            avoidHighways: false,
+            avoidTolls: false,
+        };
+        
+        await service.getDistanceMatrix(request).then((response) => {
+            temparr.push(response.rows)
+            // console.log(response.originAddresses,response.destinationAddresses)   
+            })
+           
+   }
+   //console.log(temparr)
+   for (let i = 0; i < temparr.length; i++){
+    //console.log(temparr[i][0].elements)
+    distdur[i] = temparr[i][0].elements
+   }
+   //console.log(distdur)
+   for (let i = 0; i < distdur.length; i++){
+    dists[i]=[]
+    durs[i]=[]
+        for (let j = 0; j < (distdur[i]).length; j++)   {
+            dists[i].push((distdur[i][j]).distance)
+            durs[i].push((distdur[i][j]).duration)
+    } 
+   }
+   //console.log(dists)
+   //console.log(durs)
+   for (let i = 0; i < dists.length; i++){
+    distsf[i]=[]
+        for (let j = 0; j < (dists[i]).length; j++)   {
+            distsf[i].push(Number(((dists[i][j]).text).split(" ")[0]))
+    } 
+   }
+   for (let i = 0; i < durs.length; i++){
+    dursf[i]=[]
+        for (let j = 0; j < (durs[i]).length; j++)   {
+            dursf[i].push(Number(((durs[i][j]).text).split(" ")[0]))
+    } 
+   }
+   
+   adjdist = []
+   for (let i = 0; i < distsf.length; i++){
+    adjdist[i] = []
+    for (let j = 0; j < distsf.length; j++){
+        if(i==j){
+            adjdist[i][j]=0
+        }
+        if(i<j){
+            adjdist[i][j]=distsf[i][j-1]
+        }
+        if(i>j){
+            adjdist[i][j]=distsf[i][j]
+        }
+    }
+   }
+   //console.log(distsf)
+   //console.log(adjdist)
+   adjdurs = []
+   for (let i = 0; i < dursf.length; i++){
+    adjdurs[i] = []
+    for (let j = 0; j < dursf.length; j++){
+        if(i==j){
+            adjdurs[i][j]=0
+        }
+        if(i<j){
+            adjdurs[i][j]=dursf[i][j-1]
+        }
+        if(i>j){
+            adjdurs[i][j]=dursf[i][j]
+        }
+    }
+   }
+//    console.log(dursf);
+   console.log(adjdurs);
+   
+   //permutations
+//    var results = [];
+//         function permutator(inputArr) {
+  
+
+//   function permute(arr, memo) {
+//     var cur, memo = memo || [];
+
+//     for (var i = 0; i < arr.length; i++) {
+//       cur = arr.splice(i, 1);
+//       if (arr.length === 0) {
+//         results.push(memo.concat(cur));
+//       }
+//       permute(arr.slice(), memo.concat(cur));
+//       arr.splice(i, 0, cur[0]);
+//     }
+
+//     return results;
+//   }
+
+//   return permute(inputArr);
+// }
+//     var a=[];
+    
+//     for(k=0;k<dursf.length;k++)
+//     {a[k]=k;}
+//     //console.log(a);
+//     var len=a.length;
+//     //console.log(a);
+//     var new_a=[];
+//     for(iter=1;iter<len-1;iter++)
+//     {
+//         new_a[iter-1]=iter;
+//     }
+//     //console.log(new_a);
+//     permutator(new_a);
+//     var len_results=results.length;
+//     for(i=0;i<len_results;i++)
+//     {
+//         results[i].unshift(0);
+//         results[i].push(len-1);
+//     }
+//     //console.log(results);
+//     var min=100000;
+//     var a1=0;
+//     var ans
+//     //console.log(adjdurs[0][1])
+//     var new_length=new_a.length;
+//     var c=new_length;
+//     var n=1;
+//     while(c!=1)
+//     {
+//         n=n*c;
+//         c--;
+//     }
+//     // console.log(n)
+//     for(i=0;i<n;i++)
+//     {   
+//         a1=0;
+//         for(j=0;j<results[0].length-1;j++)
+//         {
+//             // console.log(results[i][j])
+//             // console.log(results[i][j+1])
+           
+//            a1+=adjdist[results[i][j]][results[i][j+1]]; 
+            
+//         }
+//         if(a1<min){
+//                 min=a1;
+//                 //console.log(results[i])
+//                 ans=results[i];
+//             }
+//     }
+//     console.log(ans)
+const start = Date.now();
+
+
+var permutation = [];
+function permutator(inputArr) {
+
+
+function permute(arr, memo) {
+var cur, memo = memo || [];
+
+for (var i = 0; i < arr.length; i++) {
+cur = arr.splice(i, 1);
+if (arr.length === 0) {
+permutation.push(memo.concat(cur));
+}
+permute(arr.slice(), memo.concat(cur));
+arr.splice(i, 0, cur[0]);
+}
+
+return permutation;
+}
+
+return permute(inputArr);
+}
+var a=[];
+
+for(k=0;k<dursf.length;k++)
+{a[k]=k;}
+//console.log(a);
+var len=a.length;
+//console.log(a);
+var new_a=[];
+for(iter=1;iter<len-1;iter++)
+{
+new_a[iter-1]=iter;
+}
+//console.log(new_a);
+
+
+
+permutator(new_a);
+var len_permutation = permutation.length;
+for (i = 0; i < len_permutation; i++) {
+permutation[i].unshift(0);
+permutation[i].push(len - 1);
+}
+
+var min = Infinity; // Initialize min to positive infinity
+var ans;
+var new_length = new_a.length;
+var c = new_length;
+var n = 1;
+while (c != 1) {
+n = n * c;
+c--;
+}
+console.log(n);
+
+for (i = 0; i < n; i++) {
+var a1 = 0;
+var prune = false; 
+var visited = new Set(); 
+
+for (j = 0; j < permutation[0].length - 1; j++) {
+var currentDist = adjdist[permutation[i][j]][permutation[i][j + 1]];
+var remainingDist = 0;
+
+
+for (k = j + 1; k < permutation[0].length - 1; k++) {
+if (visited.has(permutation[i][k])) {
+prune = true; 
+break;
+}
+
+remainingDist += adjdist[permutation[i][k]][permutation[i][k + 1]];
+if (a1 + currentDist + remainingDist >= min) {
+prune = true; 
+break;
+}
+}
+
+if (prune) {
+    // console.log(`Pruned at permutation ${i}, step ${j}`);
+    break; 
+}
+
+visited.add(permutation[i][j]);
+a1 += currentDist;
+}
+
+if (!prune) {
+    console.log(`Completed permutation ${i} with distance ${a1}`);
+    if(a1 < min){
+min = a1;
+console.log(`New minimum found: ${min}`);
+ans = permutation[i];
+    }
+}
+}
+
+console.log(ans);
+
+    let corddict = {}
+    for (let i =0; i<cordlistunordered.length;i++){
+        corddict[i]=cordlistunordered[i]
+    }
+    
+
+     opstr = ""
+     for (let i =0 ; i<(ans).length; i++){
+        if(i!=((ans).length)-1)
+        {
+         opstr = opstr + corddict[(ans)[i]] + "_"}
+         else {
+            opstr = opstr + corddict[(ans)[i]]
+         }
+     }
+
+     console.log(`Time elapsed: ${Date.now() - start} ms`);
+    window.location.href = "map.html?cord="+ opstr
+
+   
+}
+    
+
+  </script>
+</head>
+
+<body>
+  <div id="map"></div>
+</body>
+<script>
+    
+</script>
+</html>

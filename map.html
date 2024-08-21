@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Map</title>
+  <script src="https://cdn.jsdelivr.net/npm/core-js-bundle@3.30.0/minified.js"></script>
+    <script async
+     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtfLw5C_JW8OmcZgDaw_iTJGAnxB3h4Bg&loading=async&libraries=visualization&callback=initMap">
+    </script>
+  <style type="text/css">
+    #map {
+      height: 100%;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <script>
+    function urlcoord() {
+      let params = new URLSearchParams(location.search);
+      cordlist = (params.get('cord')).split("_")
+      return cordlist
+    }
+  </script>
+  <script>
+    function calculateAndDisplayRoute(directionsService, directionsRenderer, wpts) {
+      let wayps = []
+      directionsService
+      for (let i = 1; i < wpts.length - 1; i++) {
+        wayps.push({ location: wpts[i], stopover: true })
+      }
+      console.log(wayps)
+      directionsService
+        .route({
+          origin: wpts[0],
+          destination: wpts[wpts.length - 1],
+          waypoints: wayps,
+          travelMode: google.maps.TravelMode.DRIVING,
+        })
+        .then((response) => {
+          directionsRenderer.setDirections(response);
+        })
+        .catch((e) => window.alert("Directions request failed due to " + status));
+    }
+  </script>
+  <script>
+    "use strict";
+
+    let map;
+
+    function initMap() {
+      const directionsService = new google.maps.DirectionsService();
+      const directionsRenderer = new google.maps.DirectionsRenderer();
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: {
+          lat: 12.971,
+          lng: 77.594,
+        },
+        zoom: 11.5,
+      });
+      let urlcords = urlcoord()
+      let wpts = []
+      for (let i = 0; i < urlcords.length; i++) {
+        let cord = (urlcords[i]).split(',')
+        // new google.maps.Marker({ position: { lat: Number(cord[0]), lng: Number(cord[1]) }, map});
+        wpts.push(new google.maps.LatLng(Number(cord[0]), Number(cord[1])))
+      }
+      console.log(wpts)
+      directionsRenderer.setMap(map);
+      calculateAndDisplayRoute(directionsService, directionsRenderer, wpts);
+    }
+    
+
+  </script>
+</head>
+
+<body>
+  <div id="map"></div>
+</body>
+
+</html>

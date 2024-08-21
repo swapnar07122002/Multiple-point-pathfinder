@@ -1,0 +1,114 @@
+<html lang="en">
+
+<head>
+    <style>
+        body{
+            background-image: url('https://c.wallhere.com/photos/a3/26/1920x1080_px_Evening_mountain_Peaceful_sunset-544881.jpg!d');
+            background-size:     cover;                     
+            background-repeat:   no-repeat;
+        }
+        .form {
+		margin: 0 auto;
+		width: 50%;
+        }
+        .form label{
+            display: inline-block;
+            font-family: 'Segoe UI';
+            color: white;
+            font-size: 30px;
+            text-align: right;
+        }
+
+        .form input{
+            display: inline-block;
+            text-align: left;
+            
+        }
+        .text-borders{
+            font-family: 'Segoe UI';
+            font-size: 20px;
+            border-radius:6.5px;
+            height:4.75%;
+            width:100%;
+        }
+        .submit-button{
+            border-radius:6.5px;
+            margin-top: 4px;
+            font-size: 17px;
+        }
+        
+    </style>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Project</title>
+    <script type="text/javascript">
+        function locationformat(locations) {
+            locationlist = locations.split(",")
+            for (let i = 0; i < locationlist.length; i++) {
+                locationlist[i] = locationlist[i].trim()
+                for (let j = 0; j < 5; j++) {   
+                    locationlist[i] = locationlist[i].replace(" ", "+")
+                }
+            }
+            return locationlist
+        }
+        /*function geocoder(locationlist) {
+            geocodelist = []
+            for (let i = 0; i < locationlist.length; i++) {
+                url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + locationlist[i] + "&key=AIzaSyAtfLw5C_JW8OmcZgDaw_iTJGAnxB3h4Bg"
+                fetch(url, { method: 'GET' })
+                    .then(Result => Result.json())
+                    .then(string => {
+                        lat1 = (string.results[0].geometry.location.lat).toString().slice(0,8)
+                        long1 = (string.results[0].geometry.location.lng).toString().slice(0,8)
+                        coord = lat1 + "," + long1
+                        geocodelist[i] = coord
+                    })
+            }
+            return geocodelist
+        }*/
+        async function geocoder(location) {
+            url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + location + "&key=AIzaSyAtfLw5C_JW8OmcZgDaw_iTJGAnxB3h4Bg"
+            const response = await fetch(url, { method: 'GET' });
+            const string = await response.json();
+            lat1 = (string.results[0].geometry.location.lat).toString().slice(0, 8)
+            long1 = (string.results[0].geometry.location.lng).toString().slice(0, 8)
+            coord = lat1 + "," + long1
+            return coord;
+        }
+
+    </script>
+</head>
+
+<body>
+    <form id="form" class="form">
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <label for="locations">Locations seperated by commas:</label>
+        <input class="text-borders" type="text" name="locations" id="locations" placeholder="Location 1, Location 2..."><br>
+        <input class="submit-button" type="submit" value="Submit">
+    </form>
+    <script type="text/javascript">
+        var val
+        let form = document.getElementById('form');
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault()
+            let locations = document.getElementById('locations').value
+            locationlist1 = locationformat(locations)
+            let cordlist = [];
+            for (let i = 0; i < locationlist1.length; i++) {
+                geocodelist = await geocoder(locationlist1[i])
+                cordlist[i] = geocodelist;
+            }
+            cordtext = cordlist.join("_")
+            console.log(locationlist)
+            console.log(cordlist)
+            console.log(cordtext)
+        //    window.location.href = "map.html?cord=" + cordtext
+           window.location.href = "algorithms2.html?cord=" + cordtext
+
+        })
+    </script>
+</body>
+
+</html>
